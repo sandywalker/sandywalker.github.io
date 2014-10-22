@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<title>WebUI Popover Demo</title>		
-		<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="../dist/jquery.webui-popover.min.css">
+		<link href="bootstrap.css" rel="stylesheet">
+		<link rel="stylesheet" href="../src/jquery.webui-popover.css">
 		<style>
 			body{
 				background: #eee;
@@ -64,7 +64,7 @@
 		
 		<header>
 			<div class="container">
-        	<h1> <i class="glyphicon glyphicon-comment"></i> WebUI Popover Demo</h1>
+        	<h1> <i class="glyphicon glyphicon-comment"></i> WebUI Popover  </h1>
         	<p>A lightWeight popover plugin with jquery ,enchance the  popover plugin of bootstrap with some awesome new features. It works well with bootstrap ,but bootstrap is not necessary!</p>    
         	</div>    
 		</header>
@@ -261,8 +261,8 @@
 		</div>		
 		
 		
-		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>		
-		<script src="../dist/jquery.webui-popover.min.js"></script>	
+		<script src="jquery.js"></script>		
+		<script src="../src/jquery.webui-popover.js"></script>	
 		<script>
 			(function(){
 
@@ -327,8 +327,8 @@
 
 
 					var
-					 	asyncSettings = {	width:260,
-					 						height:350,
+					 	asyncSettings = {	width:'auto',
+					 						height:'200',
 					 						closeable:true,
 					 						padding:false,
 					 						cache:false,
