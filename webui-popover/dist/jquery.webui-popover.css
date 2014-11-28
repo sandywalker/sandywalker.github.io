@@ -11,7 +11,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1060;
+  z-index: 9999;
   display: none;
   width: 276px;
   min-height: 50px;
@@ -223,6 +223,9 @@
 .webui-popover-inverse.left-top > .arrow:after,
 .webui-popover-inverse.left-bottom > .arrow:after {
   border-left-color: #333333;
+}
+.webui-popover i.icon-refresh:before {
+  content: "";
 }
 .webui-popover i.icon-refresh {
   display: block;

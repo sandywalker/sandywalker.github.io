@@ -18,7 +18,14 @@
 					height:'auto',
 					trigger:'click',
 					style:'',
-					delay:300,
+					delay: {
+                        show: null,
+                        hide: null
+                    },
+                    async: {
+                        before: null, //function(that, xhr){}
+                        success: null //function(that, xhr){}
+                    },
 					cache:true,
 					multi:false,
 					arrow:true,
@@ -28,6 +35,7 @@
 					padding:true,
 					url:'',
 					type:'html',
+					constrains:null,
 					template:'<div class="webui-popover">'+
 								'<div class="arrow"></div>'+
 								'<div class="webui-popover-inner">'+
@@ -42,11 +50,14 @@
 		// The actual plugin constructor
 		function WebuiPopover ( element, options ) {
 				this.$element = $(element);
+                if($.type(options.delay) === 'string' || $.type(options.delay) === 'number') {
+                    options.delay = {show:null,hide:options.delay}; // bc break fix
+                }
 				this.options = $.extend( {}, defaults, options );
 				this._defaults = defaults;
 				this._name = pluginName;
+				this._targetclick = false;
 				this.init();
-
 		}
 
 		WebuiPopover.prototype = {
@@ -67,7 +78,11 @@
 				destroy:function(){
 					this.hide();
 					this.$element.data('plugin_'+pluginName,null);
-					this.$element.off();
+					if (this.options.trigger==='click'){
+						this.$element.off('click');
+					}else{
+						this.$element.off('mouseenter mouseleave');
+					}
 					if (this.$target){
 						this.$target.remove();
 					}
@@ -145,7 +160,7 @@
 					$target.remove().css({ top: -1000, left: -1000, display: 'block' }).appendTo(document.body);
 					targetWidth = $target[0].offsetWidth;
 					targetHeight = $target[0].offsetHeight;
-					placement = this.getPlacement(elementPos,targetHeight);
+					placement = this.getPlacement(elementPos);
 					this.initTargetEvents();
 				    var postionInfo = this.getTargetPositin(elementPos,placement,targetWidth,targetHeight);
 					this.$target.css(postionInfo.position).addClass(placement).addClass('in');
@@ -198,6 +213,18 @@
 				getTitle:function(){
 					return this.options.title||this.$element.attr('data-title')||this.$element.attr('title');
 				},
+				getUrl:function(){
+					return this.options.url||this.$element.attr('data-url');
+				},
+                getDelayShow:function(){
+					return this.options.delay.show||this.$element.attr('data-delay-show')||0;
+				},
+                getHideDelay:function(){
+					return this.options.delay.hide||this.$element.attr('data-delay-hide')||300;
+				},
+				getConstrains:function(){
+					return this.options.constrains||this.$element.attr('data-contrains');
+				},
 				setTitle:function(title){
 					var $titleEl = this.getTitleElement();
 					if (title){
@@ -210,9 +237,9 @@
 					return this.getContent();
 				},
 				getContent:function(){
-					if (this.options.url){
+					if (this.getUrl()){
 						if (this.options.type==='iframe'){
-							this.content = $('<iframe frameborder="0"></iframe>').attr('src',this.options.url);
+							this.content = $('<iframe frameborder="0"></iframe>').attr('src',this.getUrl());
 						}
 					}else if (!this.content){
 						var content='';
@@ -236,9 +263,14 @@
 				setContentASync:function(content){
 					var that = this;
 					$.ajax({
-						url:this.options.url,
+						url:this.getUrl(),
 						type:'GET',
 						cache:this.options.cache,
+                        beforeSend:function(xhr) {
+							if (that.options.async.before){
+								that.options.async.before(that, xhr);
+							}
+                        },
 						success:function(data){
 							if (content&&$.isFunction(content)){
 								that.content = content.apply(that.$element[0],[data]);
@@ -249,6 +281,9 @@
 							var $targetContent = that.getContentElement();
 							$targetContent.removeAttr('style');
 							that.displayContent();
+							if (that.options.async.before){
+								that.options.async.success(that, data);
+							}
 						}
 					});
 				},
@@ -262,14 +297,17 @@
 				mouseenterHandler:function(){
 					var self = this;
 					if (self._timeout){clearTimeout(self._timeout);}
-					if (!self.getTarget().is(':visible')){self.show();}
+                    self._enterTimeout = setTimeout(function(){
+					    if (!self.getTarget().is(':visible')){self.show();}
+                    },this.getDelayShow());
 				},
 				mouseleaveHandler:function(){
 					var self = this;
+                    clearTimeout(self._enterTimeout);
 					//key point, set the _timeout  then use clearTimeout when mouse leave
 					self._timeout = setTimeout(function(){
 						self.hide();
-					},self.options.delay);
+					},this.getHideDelay());
 				},
 				escapeHandler:function(e){
 					if (e.keyCode===27){
@@ -277,11 +315,15 @@
 					}
 				},
 				bodyClickHandler:function(){
-					this.hideAll();
+					if (this._targetclick){
+						this._targetclick = false;
+					}else{
+						this.hideAll();
+					}
 				},
 
-				targetClickHandler:function(e){
-					e.stopPropagation();
+				targetClickHandler:function(){
+					this._targetclick = true;
 				},
 
 				//reset and init the target events;
@@ -296,7 +338,7 @@
 				},
 				/* utils methods */
 				//caculate placement of the popover
-				getPlacement:function(pos,targetHeight){
+				getPlacement:function(pos){
 					var
 						placement,
 						de = document.documentElement,
@@ -306,8 +348,8 @@
 						scrollTop = Math.max(db.scrollTop,de.scrollTop),
 						scrollLeft = Math.max(db.scrollLeft,de.scrollLeft),
 						pageX = Math.max(0,pos.left - scrollLeft),
-						pageY = Math.max(0,pos.top - scrollTop),
-						arrowSize = 20;
+						pageY = Math.max(0,pos.top - scrollTop);
+						//arrowSize = 20;
 
 					//if placement equals auto，caculate the placement by element information;
 					if (typeof(this.options.placement)==='function'){
@@ -316,32 +358,55 @@
 						placement = this.$element.data('placement')||this.options.placement;
 					}
 
+
 					if (placement==='auto'){
+						var constrainsH = this.getConstrains() === 'horizontal',
+							constrainsV = this.getConstrains() === 'vertical';
 						if (pageX<clientWidth/3){
 							if (pageY<clientHeight/3){
-								placement = 'bottom-right';
+								placement = constrainsH?'right-bottom':'bottom-right';
 							}else if (pageY<clientHeight*2/3){
-								placement = 'right';
+								if (constrainsV){
+									placement = pageY<=clientHeight/2?'bottom-right':'top-right';
+								}else{
+									placement = 'right';
+								}
 							}else{
-								placement = 'top-right';
+								placement =constrainsH?'right-top':'top-right';
 							}
 							//placement= pageY>targetHeight+arrowSize?'top-right':'bottom-right';
 						}else if (pageX<clientWidth*2/3){
 							if (pageY<clientHeight/3){
-								placement = 'bottom';
+								if (constrainsH){
+									placement =pageX<=clientWidth/2?'right-bottom':'left-bottom';
+								}else{
+									placement ='bottom';
+								}
 							}else if (pageY<clientHeight*2/3){
-								placement = 'bottom';
+								if (constrainsH){
+									placement = pageX<=clientWidth/2?'right':'left';
+								}else{
+									placement = pageY<=clientHeight/2?'bottom':'top';
+								}
 							}else{
-								placement = 'top';
+								if (constrainsH){
+									placement =pageX<=clientWidth/2?'right-top':'left-top';
+								}else{
+									placement ='top';
+								}
 							}
 						}else{
-							placement = pageY>targetHeight+arrowSize?'top-left':'bottom-left';
+							//placement = pageY>targetHeight+arrowSize?'top-left':'bottom-left';
 							if (pageY<clientHeight/3){
-								placement = 'bottom-left';
+								placement = constrainsH?'left-bottom':'bottom-left';
 							}else if (pageY<clientHeight*2/3){
-								placement = 'left';
+								if (constrainsV){
+									placement = pageY<=clientHeight/2?'bottom-left':'top-left';
+								}else{
+									placement = 'left';
+								}
 							}else{
-								placement = 'top-left';
+								placement = constrainsH?'left-top':'top-left';
 							}
 						}
 					}
@@ -360,7 +425,7 @@
 						elementH = this.$element.outerHeight(),
 						position={},
 						arrowOffset=null,
-						arrowSize = this.options.arrow?28:0,
+						arrowSize = this.options.arrow?20:0,
 						fixedW = elementW<arrowSize+10?arrowSize:0,
 						fixedH = elementH<arrowSize+10?arrowSize:0;
 					switch (placement) {
