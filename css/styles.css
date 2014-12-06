@@ -81,7 +81,7 @@ body.bg-home{
 }
 
 #homeContent .avatar{
-	margin:0 auto -0px auto;
+	margin:0 auto -30px auto;
 	width:100px;
 	height:100px;
 	border-radius: 100px;
@@ -103,6 +103,7 @@ body.bg-home{
 	padding:0;
 	font-size: 18px;
 	
+	
 }
 #homeContent .menubar li{
 	float:left;
@@ -118,6 +119,11 @@ body.bg-home{
 	height:30px;
 	overflow: hidden;
 	text-align: center;
+}
+
+#homeContent .menubar li a .cap{
+	font-size: 28px;
+	font-weight: normal;
 }
 
 #homeContent .menubar li a .word{
