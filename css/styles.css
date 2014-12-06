@@ -1,0 +1,153 @@
+
+body{
+	font:14px Helvetica Neue, Helvetica, arial, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+	font-weight: lighter;
+}
+
+
+body.bg-home{
+	background: #ef3fac;
+	color:#eee;
+	
+}
+
+
+
+
+#homeMain{
+	height:650px;
+	padding-top:150px;
+	background: -webkit-linear-gradient(#00b8e4,#ef3fac );
+    background: -o-linear-gradient(#00b8e4,#ef3fac); 
+    background: -moz-linear-gradient(#00b8e4, #ef3fac); 
+    background: linear-gradient(#00b8e4,#ef3fac); 
+    position: relative;
+}
+
+#homeContent{
+	font-size: 20px;
+	width:98%;
+	margin:0 auto;
+	
+}
+
+.circles{
+	position: absolute;
+	background:#fff;
+}
+#circle1{
+	width: 100px;
+	height:100px;
+	border-radius: 100px;
+	left:120px;
+	top:80px;
+	opacity: .2;
+}
+
+#circle2{
+	width: 50px;
+	height:50px;
+	border-radius: 50px;
+	left:90px;
+	top:80px;
+	opacity: .5;
+}
+
+#circle3{
+	width: 10px;
+	height:10px;
+	border-radius: 10px;
+	right:90px;
+	top:345px;
+	opacity: .3;
+}
+
+#circle4{
+	width: 50px;
+	height:50px;
+	border-radius: 50px;
+	right:350px;
+	top:50px;
+	opacity: .3;
+}
+
+
+
+
+#homeContent  header{
+	text-align: center;
+	border-bottom: #aae 1px solid;
+	height:210px;
+}
+
+#homeContent .avatar{
+	margin:0 auto -0px auto;
+	width:100px;
+	height:100px;
+	border-radius: 100px;
+	border-bottom:3px solid #eee;
+}
+
+#homeContent .slogon{
+	font-size:32px;
+}
+#homeContent .slogon strong{
+	font-size: 60px;
+	font-weight: normal;
+	color:#cd3dcb;
+}
+
+#homeContent .menubar{
+	width:960px;
+	margin:0 auto;
+	padding:0;
+	font-size: 18px;
+	
+}
+#homeContent .menubar li{
+	float:left;
+	width:240px;
+	list-style: none;
+	height:120px;
+}	
+
+#homeContent .menubar li a{
+	padding:30px 0 0 0;
+	margin:0 auto;
+	display: block;
+	height:30px;
+	overflow: hidden;
+	text-align: center;
+}
+
+#homeContent .menubar li a .word{
+	opacity: .4;
+	filter:alpha(opacity=40); 
+}
+
+#homeContent .menubar li a:link,#homeContent .menubar li a:visited{
+	color:#ddd;
+	text-decoration: none;
+}
+#homeContent .menubar li a:hover,#homeContent .menubar li a:active{
+	color:#fff;
+	width:auto;
+}	
+#homeContent .menubar li a:hover .word,
+#homeContent .menubar li a:active .word{
+	opacity:.8;
+	filter:alpha(opacity=80); 
+}
+
+#homeContent .info{
+	position: absolute;
+	bottom:20px;
+	right:20px;
+	font-size:12px;
+}
+
+
+#homeContent .menubar:after{
+	clear:both;
+}
+
