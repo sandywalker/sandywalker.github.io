@@ -1,5 +1,5 @@
 /*
- *  webui popover plugin  - v1.0.5
+ *  webui popover plugin  - v1.1.1
  *  A lightWeight popover plugin with jquery ,enchance the  popover plugin of bootstrap with some awesome new features. It works well with bootstrap ,but bootstrap is not necessary!
  *  https://github.com/sandywalker/webui-popover
  *
@@ -36,6 +36,7 @@
 					url:'',
 					type:'html',
 					constrains:null,
+					animation:null,
 					template:'<div class="webui-popover">'+
 								'<div class="arrow"></div>'+
 								'<div class="webui-popover-inner">'+
@@ -51,7 +52,7 @@
 		function WebuiPopover ( element, options ) {
 				this.$element = $(element);
                 if($.type(options.delay) === 'string' || $.type(options.delay) === 'number') {
-                    options.delay = {show:null,hide:options.delay}; // bc break fix
+                    options.delay = {show:options.delay,hide:options.delay}; // bc break fix
                 }
 				this.options = $.extend( {}, defaults, options );
 				this._defaults = defaults;
@@ -92,6 +93,11 @@
 						event.preventDefault();
 						event.stopPropagation();
 					}
+					if (this.xhr){
+						this.xhr.abort();
+						this.xhr = null;
+					}
+
 					var e = $.Event('hide.' + pluginType);
 					this.$element.trigger(e);
 					if (this.$target){this.$target.removeClass('in').hide();}
@@ -116,6 +122,7 @@
 					}
 					// use cache by default, if not cache setted  , reInit the contents 
 					if (!this.options.cache||!this._poped){
+						this.content = '';
 						this.setTitle(this.getTitle());
 						if (!this.options.closeable){
 							$target.find('.close').off('click').remove();
@@ -157,7 +164,11 @@
 					if (!this.options.arrow){
 						$target.find('.arrow').remove();
 					}
-					$target.remove().css({ top: -1000, left: -1000, display: 'block' }).appendTo(document.body);
+					$target.remove().css({ top: -1000, left: -1000, display: 'block' });
+					if (this.getAnimation()){
+						$target.addClass(this.getAnimation());
+					}
+					$target.appendTo(document.body);
 					targetWidth = $target[0].offsetWidth;
 					targetHeight = $target[0].offsetHeight;
 					placement = this.getPlacement(elementPos);
@@ -211,19 +222,35 @@
 					return this.getTarget().find('.'+pluginClass+'-content');
 				},
 				getTitle:function(){
-					return this.options.title||this.$element.attr('data-title')||this.$element.attr('title');
+					return this.$element.attr('data-title')||this.options.title||this.$element.attr('title');
 				},
 				getUrl:function(){
-					return this.options.url||this.$element.attr('data-url');
+					return this.$element.attr('data-url')||this.options.url;
 				},
                 getDelayShow:function(){
-					return this.options.delay.show||this.$element.attr('data-delay-show')||0;
+                    var dataAttr = this.$element.attr('data-delay-show');
+                    if (typeof(dataAttr) !== 'undefined') {
+                        return dataAttr;
+                    }
+					return this.options.delay.show||100;
 				},
                 getHideDelay:function(){
-					return this.options.delay.hide||this.$element.attr('data-delay-hide')||300;
+                    var dataAttr = this.$element.attr('data-delay-hide');
+                    if (typeof(dataAttr) !== 'undefined') {
+                        return dataAttr;
+                    }
+					return this.options.delay.hide||100;
 				},
 				getConstrains:function(){
-					return this.options.constrains||this.$element.attr('data-contrains');
+                    var dataAttr = this.$element.attr('data-contrains');
+                    if (typeof(dataAttr) !== 'undefined') {
+                        return dataAttr;
+                    }
+					return this.options.constrains;
+				},
+				getAnimation:function(){
+					var dataAttr = this.$element.attr('data-animation');
+					return dataAttr||this.options.animation;
 				},
 				setTitle:function(title){
 					var $titleEl = this.getTitleElement();
@@ -262,7 +289,7 @@
 				},
 				setContentASync:function(content){
 					var that = this;
-					$.ajax({
+					this.xhr = $.ajax({
 						url:this.getUrl(),
 						type:'GET',
 						cache:this.options.cache,
@@ -281,9 +308,10 @@
 							var $targetContent = that.getContentElement();
 							$targetContent.removeAttr('style');
 							that.displayContent();
-							if (that.options.async.before){
+							if (that.options.async.success){
 								that.options.async.success(that, data);
 							}
+							this.xhr = null;
 						}
 					});
 				},
@@ -470,8 +498,8 @@
 			            arrowOffset = {top: targetHeight - elementH/2 - fixedH};
 			            break;
 					  case 'left-bottom':
-			            position = {top: pos.top , left: pos.left -targetWidth};
-			            arrowOffset = {top: elementH /2 };
+			            position = {top: pos.top -fixedH , left: pos.left -targetWidth};
+			            arrowOffset = {top: elementH /2 + fixedH };
 			            break;
 
 			        }
