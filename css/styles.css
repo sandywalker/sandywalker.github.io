@@ -11,17 +11,28 @@ body.bg-home{
 	
 }
 
+.animated {
+  -webkit-animation-duration: 3s;
+          animation-duration: 3s;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+}
+
 
 
 
 #homeMain{
-	height:650px;
-	padding-top:150px;
+	position: absolute;
+	top:0;
+	left:0;
+	bottom: 0;
+	right:0;
+	padding-top:15%;
 	background: -webkit-linear-gradient(#00b8e4,#ef3fac );
     background: -o-linear-gradient(#00b8e4,#ef3fac); 
     background: -moz-linear-gradient(#00b8e4, #ef3fac); 
     background: linear-gradient(#00b8e4,#ef3fac); 
-    position: relative;
+    
 }
 
 #homeContent{
@@ -76,8 +87,13 @@ body.bg-home{
 
 #homeContent  header{
 	text-align: center;
-	border-bottom: #aae 1px solid;
+	
 	height:210px;
+}
+
+#homeContent .hline{
+	height:1px;
+	border-bottom: #aae 1px solid;
 }
 
 #homeContent .avatar{
@@ -98,7 +114,7 @@ body.bg-home{
 }
 
 #homeContent .menubar{
-	width:960px;
+	width:90%;
 	margin:0 auto;
 	padding:0;
 	font-size: 18px;
@@ -107,7 +123,7 @@ body.bg-home{
 }
 #homeContent .menubar li{
 	float:left;
-	width:240px;
+	width:25%;
 	list-style: none;
 	height:120px;
 }	
