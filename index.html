@@ -14,31 +14,52 @@
 <div id="homeMain">
 	<div id="homeContent">
 		
-			<div class="circles animated zoomInLeft" id="circle1"></div>
-			<div class="circles expandOpen" id="circle2"></div>
-			<div class="circles animated fadeIn" id="circle3"></div>
-			<div class="circles expandOpen" id="circle4"></div>
-			<div class="circles" id="circle5"></div>
-			<div class="circles" id="circle6"></div>
-			<div class="circles" id="circle7"></div>
-			<div class="circles" id="circle7"></div>
+			<div class="vhide circles" id="circle1"></div>
+			<div class="vhide circles expandOpen" id="circle2"></div>
+			<div class="vhide circles animated fadeIn" id="circle3"></div>
+			<div class="vhide circles " id="circle4"></div>
+			<div class="vhide circles" id="circle5"></div>
+			<div class="vhide circles" id="circle6"></div>
+			<div class="vhide circles" id="circle7"></div>
+			<div class="vhide circles" id="circle7"></div>
 		
 		<header>
 			<div class="avatar animated rotateIn"></div>
-			<div class="slogon animated slideInLeft"> <strong>K</strong>eep  foolish , keep walking !</div>
+			<div class="vhide slogon " id="slogon"> <strong>K</strong>eep  foolish , keep walking !</div>
 		</header>
-		<div class="hline animated fadeIn" ></div>
+		<div class="vhide hline" id="hline" ></div>
 		<ul class="menubar">
-			<li class="animated slideInRight"><a href="#"><span class="cap">H</span><span class="word">ome</span> </a></li>
-			<li class="animated slideInRight"><a href="#"><span class="cap">D</span><span class="word">esign</span></a></li>
-			<li class="animated slideInRight"><a href="webui-popover/demo"><span class="cap">P</span><span class="word">lugins</span></a></li>
-			<li class="animated slideInRight"><a href="#"><span class="cap">T</span><span class="word">utorials</span></a></li>
+			<li class="vhide" id="menuHome"><a href="#"><span class="cap">H</span><span class="word">ome</span> </a></li>
+			<li class="vhide" id="menuDesign"><a href="#"><span class="cap">D</span><span class="word">esign</span></a></li>
+			<li class="vhide" id="menuPlugins"><a href="webui-popover/demo"><span class="cap">P</span><span class="word">lugins</span></a></li>
+			<li class="vhide" id="menuTutorials"><a href="#"><span class="cap">T</span><span class="word">utorials</span></a></li>
 		</ul>
 		<div class="info">
 			sanddywalker@gmail.com
 		</div>
 	</div>
 </div>
+
+	<script>
+	(function(){
+		setTimeout(function(){document.getElementById('circle1').className='circles animated zoomInLeft';}, 1000);
+		setTimeout(function(){document.getElementById('circle4').className='circles animated zoomInDown';}, 1500);
+		setTimeout(function(){document.getElementById('slogon').className='slogon animated slideInLeft';}, 2500);
+		setTimeout(function(){document.getElementById('hline').className='hline animated fadeIn';}, 3000);
+
+		setTimeout(function(){document.getElementById('menuHome').className='animated slideInRight';}, 3000);
+		setTimeout(function(){document.getElementById('menuDesign').className='animated slideInRight';}, 3500);
+		setTimeout(function(){document.getElementById('menuPlugins').className='animated slideInRight';}, 4000);
+		setTimeout(function(){document.getElementById('menuTutorials').className='animated slideInRight';}, 4500);
+
+		
+		setTimeout(function(){document.getElementById('circle1').className='circles floatingX';}, 3000);
+		setTimeout(function(){document.getElementById('circle2').className='circles floating';}, 2000);
+		setTimeout(function(){document.getElementById('circle3').className='circles floatingXBig';}, 2000);
+		setTimeout(function(){document.getElementById('circle4').className='circles floating';}, 3500);
+		
+	})();
+	</script>
 
 </body>
 </html>

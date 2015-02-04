@@ -11,11 +11,96 @@ body.bg-home{
 	
 }
 
+.vhide {
+	visibility: hidden;
+}
+
+
 .animated {
-  -webkit-animation-duration: 3s;
-          animation-duration: 3s;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
   -webkit-animation-fill-mode: both;
           animation-fill-mode: both;
+}
+
+
+.floating{
+
+
+	animation-duration: 3.8s;	
+	-webkit-animation-duration: 3.8s;
+
+}
+
+.floatingX{
+	animation-name: floatingX;
+	-webkit-animation-name: floatingX;
+
+	animation-duration: 3.5s;	
+	-webkit-animation-duration: 3.5s;
+
+	animation-iteration-count: infinite;
+	-webkit-animation-iteration-count: infinite;
+}
+
+@keyframes floatingX {
+	0% {
+		transform: translateX(0%);	
+	}
+	50% {
+		transform: translateX(15%);	
+	}	
+	100% {
+		transform: translateX(0%);
+	}			
+}
+
+@-webkit-keyframes floatingX {
+	0% {
+		-webkit-transform: translateX(0%);	
+	}
+	50% {
+		-webkit-transform: translateX(15%);	
+	}	
+	100% {
+		-webkit-transform: translateX(0%);
+	}			
+}
+
+
+.floatingXBig{
+	animation-name: floatingXBig;
+	-webkit-animation-name: floatingXBig;
+
+	animation-duration: 3.5s;	
+	-webkit-animation-duration: 3.5s;
+
+	animation-iteration-count: infinite;
+	-webkit-animation-iteration-count: infinite;
+}
+
+@keyframes floatingXBig {
+	0% {
+		transform: translateX(0%);	
+	}
+	50% {
+		transform: translateX(105%);	
+	}	
+	100% {
+		transform: translateX(0%);
+	}			
+}
+
+@-webkit-keyframes floatingXBig {
+	0% {
+		-webkit-transform: translateX(0%);	
+	}
+	50% {
+		-webkit-transform: translateX(105%);	
+	}	
+	100% {
+		-webkit-transform: translateX(0%);
+	}			
 }
 
 
@@ -50,8 +135,8 @@ body.bg-home{
 	width: 100px;
 	height:100px;
 	border-radius: 100px;
-	left:120px;
-	top:80px;
+	left:8%;
+	top:5%;
 	opacity: .2;
 }
 
@@ -59,8 +144,8 @@ body.bg-home{
 	width: 50px;
 	height:50px;
 	border-radius: 50px;
-	left:90px;
-	top:80px;
+	left:6%;
+	top:5%;
 	opacity: .5;
 }
 
@@ -77,8 +162,8 @@ body.bg-home{
 	width: 50px;
 	height:50px;
 	border-radius: 50px;
-	right:350px;
-	top:50px;
+	right:10%;
+	top:3%;
 	opacity: .3;
 }
 
@@ -163,8 +248,8 @@ body.bg-home{
 
 #homeContent .info{
 	position: absolute;
-	bottom:20px;
-	right:20px;
+	bottom:5px;
+	right:5px;
 	font-size:12px;
 }
 
