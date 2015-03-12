@@ -11,6 +11,15 @@ body.bg-home{
 	
 }
 
+.info a,.info a:visited{
+	color: #fff;
+	text-decoration: none;
+}
+
+.info a:hover,.info a:active{
+	color:#eee;
+}
+
 .vhide {
 	visibility: hidden;
 }
