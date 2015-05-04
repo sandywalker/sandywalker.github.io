@@ -1,5 +1,5 @@
 /*
- *  webui popover plugin  - v1.1.1
+ *  webui popover plugin  - v1.1.3
  *  A lightWeight popover plugin with jquery ,enchance the  popover plugin of bootstrap with some awesome new features. It works well with bootstrap ,but bootstrap is not necessary!
  *  https://github.com/sandywalker/webui-popover
  *
@@ -47,6 +47,8 @@
 							'</div>'
 		};
 
+		var _globalIdSeed = 0;
+
 
 		// The actual plugin constructor
 		function WebuiPopover ( element, options ) {
@@ -65,21 +67,24 @@
 				//init webui popover
 				init: function () {
 					//init the event handlers
-					if (this.options.trigger==='click'){
+					if (this.getTrigger()==='click'){
 						this.$element.off('click').on('click',$.proxy(this.toggle,this));
 					}else{
-						this.$element.off('mouseenter mouseleave')
+						this.$element.off('mouseenter mouseleave click')
 										.on('mouseenter',$.proxy(this.mouseenterHandler,this))
-										.on('mouseleave',$.proxy(this.mouseleaveHandler,this));
+										.on('mouseleave',$.proxy(this.mouseleaveHandler,this))
+										.on('click',function(e){e.stopPropagation();});
 					}
 					this._poped = false;
 					this._inited = true;
+					this._idSeed = _globalIdSeed;
+					_globalIdSeed++;
 				},
 				/* api methods and actions */
 				destroy:function(){
 					this.hide();
 					this.$element.data('plugin_'+pluginName,null);
-					if (this.options.trigger==='click'){
+					if (this.getTrigger()==='click'){
 						this.$element.off('click');
 					}else{
 						this.$element.off('mouseenter mouseleave');
@@ -121,7 +126,7 @@
 						this.hideAll();
 					}
 					// use cache by default, if not cache setted  , reInit the contents 
-					if (!this.options.cache||!this._poped){
+					if (!this.getCache()||!this._poped){
 						this.content = '';
 						this.setTitle(this.getTitle());
 						if (!this.options.closeable){
@@ -209,9 +214,16 @@
 				},
 
 				/*getter setters */
+				getTriggerElement:function(){
+					return this.$element;
+				},
 				getTarget:function(){
 					if (!this.$target){
-						this.$target = $(this.options.template);
+						var id = pluginName+this._idSeed;
+						this.$target = $(this.options.template)
+							.attr('id',id)
+							.data('trigger-element',this.getTriggerElement());
+						this.getTriggerElement().attr('data-target',id);
 					}
 					return this.$target;
 				},
@@ -227,6 +239,19 @@
 				getUrl:function(){
 					return this.$element.attr('data-url')||this.options.url;
 				},
+                getCache:function(){
+                    var dataAttr = this.$element.attr('data-cache');
+                    if (typeof(dataAttr) !== 'undefined') {
+                        switch(dataAttr.toLowerCase()){
+                            case 'true': case 'yes': case '1': return true;
+                            case 'false': case 'no': case '0': return false;
+                        }
+                    }
+					return this.options.cache;
+				},
+                getTrigger:function(){
+                    return this.$element.attr('data-trigger')||this.options.trigger;
+                },
                 getDelayShow:function(){
                     var dataAttr = this.$element.attr('data-delay-show');
                     if (typeof(dataAttr) !== 'undefined') {
@@ -292,13 +317,14 @@
 					this.xhr = $.ajax({
 						url:this.getUrl(),
 						type:'GET',
-						cache:this.options.cache,
+						cache:this.getCache(),
                         beforeSend:function(xhr) {
 							if (that.options.async.before){
 								that.options.async.before(that, xhr);
 							}
                         },
 						success:function(data){
+							that.bindBodyEvents();
 							if (content&&$.isFunction(content)){
 								that.content = content.apply(that.$element[0],[data]);
 							}else{
@@ -356,7 +382,7 @@
 
 				//reset and init the target events;
 				initTargetEvents:function(){
-					if (this.options.trigger!=='click'){
+					if (this.getTrigger()!=='click'){
 						this.$target.off('mouseenter mouseleave')
 									.on('mouseenter',$.proxy(this.mouseenterHandler,this))
 									.on('mouseleave',$.proxy(this.mouseleaveHandler,this));
@@ -437,6 +463,38 @@
 								placement = constrainsH?'left-top':'top-left';
 							}
 						}
+					}else if (placement==='auto-top'){
+						if (pageX<clientWidth/3){
+							placement='top-right';
+						}else if (pageX<clientHeight*2/3){
+							placement='top';
+						}else{
+							placement='top';
+						}
+					}else if (placement==='auto-bottom'){
+						if (pageX<clientWidth/3){
+							placement='bottom-right';
+						}else if (pageX<clientHeight*2/3){
+							placement='bottom';
+						}else{
+							placement='bottom';
+						}
+					}else if (placement==='auto-left'){
+						if (pageY<clientHeight/3){
+							placement='left-top';
+						}else if (pageY<clientHeight*2/3){
+							placement='left';
+						}else{
+							placement='left-bottom';
+						}
+					}else if (placement==='auto-right'){
+						if (pageY<clientHeight/3){
+							placement='right-top';
+						}else if (pageY<clientHeight*2/3){
+							placement='right';
+						}else{
+							placement='right-bottom';
+						}
 					}
 					return placement;
 				},
@@ -471,35 +529,35 @@
 			            break;
 			          case 'top-right':
 			            position = {top: pos.top - targetHeight, left: pos.left-fixedW};
-			            arrowOffset = {left: elementW/2 + fixedW};
+			            arrowOffset = {left: Math.min(elementW,targetWidth)/2 + fixedW};
 			            break;
 			          case 'top-left':
 			            position = {top: pos.top - targetHeight, left: pos.left -targetWidth +pos.width + fixedW};
-			            arrowOffset = {left: targetWidth - elementW /2 -fixedW};
+			            arrowOffset = {left: targetWidth - Math.min(elementW,targetWidth) /2 -fixedW};
 			            break;
 			          case 'bottom-right':
 			            position = {top: pos.top + pos.height, left: pos.left-fixedW};
-			            arrowOffset = {left: elementW /2+fixedW};
+			            arrowOffset = {left: Math.min(elementW,targetWidth) /2+fixedW};
 			            break;
 					  case 'bottom-left':
 			            position = {top: pos.top + pos.height, left: pos.left -targetWidth +pos.width+fixedW};
-			            arrowOffset = {left: targetWidth- elementW /2 - fixedW};
+			            arrowOffset = {left: targetWidth- Math.min(elementW,targetWidth) /2 - fixedW};
 			            break;
 					  case 'right-top':
 			            position = {top: pos.top -targetHeight + pos.height + fixedH, left: pos.left + pos.width};
-			            arrowOffset = {top: targetHeight - elementH/2 -fixedH};
+			            arrowOffset = {top: targetHeight - Math.min(elementH,targetHeight)/2 -fixedH};
 			            break;
 			          case 'right-bottom':
 			            position = {top: pos.top - fixedH, left: pos.left + pos.width};
-			            arrowOffset = {top: elementH /2 +fixedH };
+			            arrowOffset = {top: Math.min(elementH,targetHeight) /2 +fixedH };
 			            break;
 			          case 'left-top':
 			            position = {top: pos.top -targetHeight + pos.height+fixedH, left: pos.left - targetWidth};
-			            arrowOffset = {top: targetHeight - elementH/2 - fixedH};
+			            arrowOffset = {top: targetHeight - Math.min(elementH,targetHeight)/2 - fixedH};
 			            break;
 					  case 'left-bottom':
 			            position = {top: pos.top -fixedH , left: pos.left -targetWidth};
-			            arrowOffset = {top: elementH /2 + fixedH };
+			            arrowOffset = {top: Math.min(elementH,targetHeight) /2 + fixedH };
 			            break;
 
 			        }
