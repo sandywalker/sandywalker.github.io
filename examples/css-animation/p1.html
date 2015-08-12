@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0065)https://dl.dropboxusercontent.com/u/12132497/12-principles/2.html -->
+<!-- saved from url=(0065)https://dl.dropboxusercontent.com/u/12132497/12-principles/1.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>Principle 2: Anticipation</title>
+		<title>Principle 1</title>
 		
 		<style>
 		
@@ -20,16 +20,14 @@
 			overflow: hidden;
 		}
 		
-		.running #ball, .running #shadow {
+		.running #ball {
 			width: 50px;
 			height: 50px;
 			background: #00f;
 			position: absolute;
-			bottom: 25px;
+			bottom: 0;
 			left: 125px;
 			border-radius: 50px;
-			z-index: 2;
-			
 			-webkit-animation: ball 5s;
 			-webkit-transform-origin: 50% 50%;
 			
@@ -37,33 +35,19 @@
 			-moz-transform-origin: 50% 50%;
 		}
 		
-		.running #shadow {
-			background: #000;
-			bottom: 0;
-			z-index: 1;
-			
-			-webkit-animation: none;
-			-webkit-transform: scaleY(0.5);
-			
-			-moz-animation: none;
-			-moz-transform: scaleY(0.5);
-		}
-		
 		@-webkit-keyframes ball {
 			0% { -webkit-transform: translateY(-300px) scaleY(1.2); }
-			35% { -webkit-transform: translateY(-300px) scaleY(1.2); }
-			65% { -webkit-transform: translateY(0px) scaleY(1.2); }
-			67% { -webkit-transform: translateY(10px) scaleY(0.8); }
-			85% { -webkit-transform: translateY(-100px) scaleY(1.2); }
+			33% { -webkit-transform: translateY(0px) scaleY(1.2); }
+			35% { -webkit-transform: translateY(10px) scaleY(0.8); }
+			66% { -webkit-transform: translateY(-100px) scaleY(1.2); }
 			100% { -webkit-transform: translateY(0px); }
 		}
 		
 		@-moz-keyframes ball {
 			0% { -moz-transform: translateY(-300px) scaleY(1.2); }
-			35% { -moz-transform: translateY(-300px) scaleY(1.2); }
-			65% { -moz-transform: translateY(0px) scaleY(1.2); }
-			67% { -moz-transform: translateY(10px) scaleY(0.8); }
-			85% { -moz-transform: translateY(-100px) scaleY(1.2); }
+			33% { -moz-transform: translateY(0px) scaleY(1.2); }
+			35% { -moz-transform: translateY(10px) scaleY(0.8); }
+			66% { -moz-transform: translateY(-100px) scaleY(1.2); }
 			100% { -moz-transform: translateY(0px); }
 		}
 		
@@ -101,7 +85,7 @@
 			
 		</style>
 		
-		<script src="./Principle 2_ Anticipation_files/jquery.min.js" type="text/javascript"></script>
+		<script src="js/jquery.min.js" type="text/javascript"></script>
 		<script>
 		
 		$(document).ready(function() {
@@ -122,7 +106,6 @@
 		<div id="stage" class="running">
 		
 		<div id="ball"></div>
-		<div id="shadow"></div>
 		
 		</div>
 		
