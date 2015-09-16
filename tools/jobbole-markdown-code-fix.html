@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	
+	<title>Markdown code fix tool for jobbole</title>
+</head>
+<style>
+	html,body{
+		height:100%;
+		margin:0;
+		padding:0;
+	}
+	.container{
+		display: -webkit-flex;
+		display: flex;
+		flex-direction: row;
+		width:100%;
+		height:100%;
+		background: orange;
+		justify-content:  space-around
+	}
+
+	.source{
+		background: #eee;
+		width:50%;
+		height:100%;
+		display: -webkit-flex;
+		display: flex;
+		flex-direction: column;
+	}
+	.target{
+		width:50%;
+		height:100%;
+		background: #999;
+		display: -webkit-flex;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.spliter{
+		width:10px;
+	}
+
+	#convert{
+		float:right;
+	}
+
+	#sourceText,#targetText{
+		height:100%;
+	}
+</style>
+<body>
+	<div class="container">
+		<div class="source">
+			<p>源内容：<button id="convert">转换 > </button></p>
+			<textarea name="sourceText" id="sourceText" cols="30" rows="10"></textarea>
+		</div>
+		<div class="spliter">
+			
+		</div>
+		<div class="target">
+			<p>目标内容：</p>
+			<textarea name="targetText" id="targetText" cols="30" rows="10"></textarea>
+		</div>
+	</div>
+</body>
+<script>
+	(function(){
+
+
+		var langs = [
+			{
+				source:'as3',
+				target:'actionscript3'
+			},
+			{
+				source:'applescript',
+				target:'applescript'	
+			},
+			{
+				source:'bash',
+				target:'bash'	
+			},
+			{
+				source:'c,C',
+				target:'c'	
+			},
+			{
+				source:'csharp',
+				target:'csharp'	
+			},
+			{
+				source:'cpp',
+				target:'cpp'	
+			},
+			{
+				source:'css,CSS',
+				target:'css'	
+			},
+			{
+				source:'coldfusion',
+				target:'coldfusion'	
+			},
+			{
+				source:'delphi',
+				target:'delphi'	
+			},
+			{
+				source:'diff',
+				target:'diff'	
+			},
+			{
+				source:'erlang',
+				target:'erlang'	
+			},
+			{
+				source:'groovy',
+				target:'groovy'	
+			},
+			{
+				source:'html,HTML',
+				target:'html'	
+			},
+			{
+				source:'javafx',
+				target:'javafx'	
+			},
+			{
+				source:'js,javascript',
+				target:'javascript'	
+			},
+			{
+				source:'php',
+				target:'php'	
+			},{
+				source:'pascal',
+				target:'pascal'	
+			},
+			{
+				source:'erlang',
+				target:'erlang'	
+			},
+			{
+				source:'java',
+				target:'java'
+			},
+			{
+				source:'python',
+				target:'python'
+			},
+			{
+				source:'powershell',
+				target:'powershell'
+			},
+			{
+				source:'ruby',
+				target:'ruby'
+			},
+			{
+				source:'rails',
+				target:'rails'
+			},
+			{
+				source:'sass,scss',
+				target:'sass'
+			},
+			{
+				source:'shell',
+				target:'shell'
+			},
+			{
+				source:'xml',
+				target:'xml'
+			}
+		];
+
+		var getSrcTag = function(lan){
+			return new RegExp('<pre><code class="lang-' + lan +'">','gi') ;
+		}
+
+		var getTgtTag = function(lan){
+			return '<p><pre class="brush: ' + lan + '; gutter: true">';
+		}
+
+		var srcTagEnd = /<\/code><\/pre>/gi;
+
+		var tgtTagEnd = '</pre>';
+
+		var $ = function(id){
+			return document.getElementById(id);
+		};
+
+		var convert = $('convert');
+		var src = $('sourceText');
+		var tgt = $('targetText');
+
+		convert.addEventListener('click',function(e){
+			var txt = src.value;
+			for(var i in langs){
+				var lang = langs[i];
+				var srcLangs = lang.source.split(',');
+				for(j in srcLangs){
+					var srcLang = srcLangs[j];
+					txt = txt.replace(getSrcTag(srcLang),getTgtTag(lang.target));
+				}
+			}
+			console.log(srcTagEnd);
+			txt = txt.replace(srcTagEnd,tgtTagEnd);
+			tgt.value = txt;
+		})
+	})();
+</script>
+</html>
