@@ -17,12 +17,20 @@
 		flex-direction: row;
 		width:100%;
 		height:100%;
-		background: orange;
+		background: #eee;
 		justify-content:  space-around
 	}
 
 	.source{
-		background: #eee;
+		
+  
+  background: -webkit-linear-gradient(90deg, #EC6F66 10%, #F3A183 90%); /* Chrome 10+, Saf5.1+ */
+  background:    -moz-linear-gradient(90deg, #EC6F66 10%, #F3A183 90%); /* FF3.6+ */
+  background:     -ms-linear-gradient(90deg, #EC6F66 10%, #F3A183 90%); /* IE10 */
+  background:      -o-linear-gradient(90deg, #EC6F66 10%, #F3A183 90%); /* Opera 11.10+ */
+  background:         linear-gradient(90deg, #EC6F66 10%, #F3A183 90%); /* W3C */
+        
+        
 		width:50%;
 		height:100%;
 		display: -webkit-flex;
@@ -32,7 +40,15 @@
 	.target{
 		width:50%;
 		height:100%;
-		background: #999;
+		
+
+  background: -webkit-linear-gradient(90deg, #24C6DC 10%, #514A9D 90%); /* Chrome 10+, Saf5.1+ */
+  background:    -moz-linear-gradient(90deg, #24C6DC 10%, #514A9D 90%); /* FF3.6+ */
+  background:     -ms-linear-gradient(90deg, #24C6DC 10%, #514A9D 90%); /* IE10 */
+  background:      -o-linear-gradient(90deg, #24C6DC 10%, #514A9D 90%); /* Opera 11.10+ */
+  background:         linear-gradient(90deg, #24C6DC 10%, #514A9D 90%); /* W3C */
+        
+        
 		display: -webkit-flex;
 		display: flex;
 		flex-direction: column;
@@ -49,18 +65,29 @@
 	#sourceText,#targetText{
 		height:100%;
 	}
+
+	#targetTitle{
+		color:white;
+		padding:0 10px;
+	}
+
+	#sourceTitle{
+		color:white;
+		padding:0 10px;
+	}
+	
 </style>
 <body>
 	<div class="container">
 		<div class="source">
-			<p>源内容：<button id="convert">转换 > </button></p>
+			<p id="sourceTitle"><button id="convert">转换 > </button> 请把伯乐在线后台文本模式下的内容拷贝到这里（可拷贝段落，也可全文拷贝）：</p>
 			<textarea name="sourceText" id="sourceText" cols="30" rows="10"></textarea>
 		</div>
 		<div class="spliter">
 			
 		</div>
 		<div class="target">
-			<p>目标内容：</p>
+			<p id="targetTitle">转换后的内容：</p>
 			<textarea name="targetText" id="targetText" cols="30" rows="10"></textarea>
 		</div>
 	</div>
