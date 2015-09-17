@@ -68,18 +68,31 @@
 	#targetTitle{
 		color:white;
 		padding:0 10px;
+		font-size:12px;
 	}
 
 	#sourceTitle{
 		color:white;
 		padding:0 10px;
+		font-size:12px;
+	}
+
+	.hide{
+		display: none;
 	}
 	
 </style>
 <body>
 	<div class="container">
 		<div class="source">
-			<p id="sourceTitle"><button id="convert">转换 > </button> 请把伯乐在线后台文本模式下的内容拷贝到这里（可拷贝段落，也可全文拷贝）：</p>
+			<p id="sourceTitle"><button id="convert">转换 > </button>     
+			<select name="" id="mode">
+				<option value="markdownToHtml">md直接转html</option>
+				<option value="fixHtml">修正代码格式</option>
+			</select>
+			<span id="title1">请直接把markdown编辑器源码拷贝到这里 :)</span>
+			<span id="title2" class="hide">请把伯乐在线后台文本模式下的内容拷贝到这里 :)</span>
+			</p>
 			<textarea name="sourceText" id="sourceText" cols="30" rows="10"></textarea>
 		</div>
 		<div class="spliter">
@@ -91,8 +104,10 @@
 		</div>
 	</div>
 </body>
+<script src="../js/marked.js"></script>
 <script>
 	(function(){
+
 
 
 		var langs = [
@@ -109,10 +124,6 @@
 				target:'bash'	
 			},
 			{
-				source:'c,C',
-				target:'c'	
-			},
-			{
 				source:'csharp',
 				target:'csharp'	
 			},
@@ -121,8 +132,12 @@
 				target:'cpp'	
 			},
 			{
-				source:'css,CSS',
+				source:'css',
 				target:'css'	
+			},
+			{
+				source:'c',
+				target:'c'	
 			},
 			{
 				source:'coldfusion',
@@ -205,11 +220,23 @@
 			return new RegExp('<pre><code class="lang-' + lan +'">','gi') ;
 		}
 
+		// var getMDSrcTag = function(lan){
+		// 	return new RegExp('```'+lan ,'gi');
+		// }
+
 		var getTgtTag = function(lan){
-			return '<p><pre class="brush: ' + lan + '; gutter: true">';
+			return '<pre class="brush: ' + lan + '; gutter: true">';
 		}
 
+		// var s = "```Javascript";
+		// var reg = getMDSrcTag('Javascript');
+		// console.log(s.replace(reg,getTgtTag('Javascript')));
+
+		
+
 		var srcTagEnd = /<\/code><\/pre>/gi;
+
+		// var srcMDTagEnd = /```/gi;
 
 		var tgtTagEnd = '</pre>';
 
@@ -220,21 +247,53 @@
 		var convert = $('convert');
 		var src = $('sourceText');
 		var tgt = $('targetText');
+		var mode = $('mode');
+		var t1 = $('title1');
+		var t2 = $('title2');
+
+		mode.addEventListener('change',function(e){
+			t1.className = mode.selectedIndex == 0?'':'hide';
+			t2.className = mode.selectedIndex == 1?'':'hide';
+		});
 
 		convert.addEventListener('click',function(e){
-			var txt = src.value;
+			if (mode.selectedIndex == 0){
+				markdownToHtml();
+			}else{
+				fixHtml();
+			}
+		});
+
+
+		//调整格式，兼容伯乐在线的markdown代码高亮
+		function fixCodeFmt(srcText){
+			var txt = srcText;
 			for(var i in langs){
 				var lang = langs[i];
 				var srcLangs = lang.source.split(',');
 				for(j in srcLangs){
 					var srcLang = srcLangs[j];
 					txt = txt.replace(getSrcTag(srcLang),getTgtTag(lang.target));
+					//txt = txt.replace(getMDSrcTag(srcLang),getTgtTag(lang.target));
 				}
 			}
-			console.log(srcTagEnd);
 			txt = txt.replace(srcTagEnd,tgtTagEnd);
-			tgt.value = txt;
-		})
+			txt = txt.replace(/&#39;/gi,"'");
+			//txt = txt.replace(srcMDTagEnd,tgtTagEnd);
+			return txt;
+		}
+
+		//直接将markdown格式转换为符合伯乐在线格式的Html
+		function  markdownToHtml(){
+			var html = marked(src.value,{smartypants:true});
+			html = html.replace(/(<\w>.*)\n(.*<\/\w>)/gm,"$1$2");
+			tgt.value = fixCodeFmt(html);
+		}
+
+		//调整内容，生成兼容伯乐在线的markdown代码高亮的Html
+		function  fixHtml(){
+			tgt.value = fixCodeFmt(src.value);
+		}
 	})();
 </script>
 </html>
