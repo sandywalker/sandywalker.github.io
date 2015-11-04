@@ -1,5 +1,5 @@
 /*
- *  webui popover plugin  - v1.1.3
+ *  webui popover plugin  - v1.1.7
  *  A lightWeight popover plugin with jquery ,enchance the  popover plugin of bootstrap with some awesome new features. It works well with bootstrap ,but bootstrap is not necessary!
  *  https://github.com/sandywalker/webui-popover
  *
@@ -19,7 +19,7 @@
         placement: 'auto',
         width: 'auto',
         height: 'auto',
-        trigger: 'click',
+        trigger: 'click', //hover,click,sticky,manual
         style: '',
         delay: {
             show: null,
@@ -38,7 +38,6 @@
         padding: true,
         url: '',
         type: 'html',
-        constrains: null,
         animation: null,
         template: '<div class="webui-popover">' +
             '<div class="arrow"></div>' +
@@ -51,7 +50,9 @@
         backdrop: false,
         dismissible: true,
         onShow: null,
-        onHide: null
+        onHide: null,
+        abortXHR: true,
+        autoHide: false
     };
 
 
@@ -104,6 +105,10 @@
                 backdrop.appendTo(document.body).hide();
             }
             _globalIdSeed++;
+            if (this.getTrigger() === 'sticky') {
+                this.show();
+            }
+
         },
         /* api methods and actions */
         destroy: function() {
@@ -130,7 +135,14 @@
                 this.$target.remove();
             }
         },
-        hide: function(event) {
+        /*
+            param: force    boolean value, if value is true then force hide the popover
+            param: event    dom event,
+        */
+        hide: function(force, event) {
+            if (!force && this.getTrigger() === 'sticky') {
+                return;
+            }
             if (!this._opened) {
                 return;
             }
@@ -138,26 +150,42 @@
                 event.preventDefault();
                 event.stopPropagation();
             }
-            if (this.xhr) {
+            if (this.xhr && this.options.abortXHR === true) {
                 this.xhr.abort();
                 this.xhr = null;
             }
 
             var e = $.Event('hide.' + pluginType);
-            this.$element.trigger(e);
+            this.$element.trigger(e, [this.$target]);
             if (this.$target) {
-                this.$target.removeClass('in').hide();
+                this.$target.removeClass('in').addClass(this.getHideAnimation());
+                var that = this;
+                setTimeout(function() {
+                    that.$target.hide()
+                }, 300);
             }
             if (this.options.backdrop) {
                 backdrop.hide();
             }
             this._opened = false;
-            this.$element.trigger('hidden.' + pluginType);
+            this.$element.trigger('hidden.' + pluginType, [this.$target]);
 
-            if (this.options.onShow) {
-                this.options.onShow(this.$target);
+            if (this.options.onHide) {
+                this.options.onHide(this.$target);
             }
 
+        },
+        resetAutoHide: function() {
+            var that = this;
+            var autoHide = that.getAutoHide();
+            if (autoHide) {
+                if (that.autoHideHandler) {
+                    clearTimeout(that.autoHideHandler);
+                }
+                that.autoHideHandler = setTimeout(function() {
+                    that.hide();
+                }, autoHide);
+            }
         },
         toggle: function(e) {
             if (e) {
@@ -175,7 +203,6 @@
         },
         /*core method ,show popover */
         show: function() {
-
             var
                 $target = this.getTarget().removeClass().addClass(pluginClass).addClass(this._customTargetClass);
             if (!this.options.multi) {
@@ -195,8 +222,6 @@
                     this.setContent(this.getContent());
                 } else {
                     this.setContentASync(this.options.content);
-                    this.displayContent();
-                    return;
                 }
                 $target.show();
             }
@@ -211,6 +236,7 @@
                 backdrop.show();
             }
             this._opened = true;
+            this.resetAutoHide();
         },
         displayContent: function() {
             var
@@ -228,13 +254,17 @@
                 placement = 'bottom',
                 e = $.Event('show.' + pluginType);
             //if (this.hasContent()){
-            this.$element.trigger(e);
+            this.$element.trigger(e, [$target]);
             //}
             if (this.options.width !== 'auto') {
                 $target.width(this.options.width);
             }
             if (this.options.height !== 'auto') {
                 $targetContent.height(this.options.height);
+            }
+
+            if (this.options.style) {
+                this.$target.addClass(pluginClass + '-' + this.options.style);
             }
 
             //init the popover and insert into the document body
@@ -246,13 +276,19 @@
                 left: -2000,
                 display: 'block'
             });
+
             if (this.getAnimation()) {
                 $target.addClass(this.getAnimation());
             }
             $target.appendTo(document.body);
+
             targetWidth = $target[0].offsetWidth;
             targetHeight = $target[0].offsetHeight;
             placement = this.getPlacement(elementPos);
+
+            //This line is just for compatible with knockout custom binding
+            this.$element.trigger('added.' + pluginType);
+
             this.initTargetEvents();
             var postionInfo = this.getTargetPositin(elementPos, placement, targetWidth, targetHeight);
             this.$target.css(postionInfo.position).addClass(placement).addClass('in');
@@ -262,9 +298,7 @@
                 $iframe.width($target.width()).height($iframe.parent().height());
             }
 
-            if (this.options.style) {
-                this.$target.addClass(pluginClass + '-' + this.options.style);
-            }
+
 
             if (!this.options.padding) {
                 $targetContent.css('height', $targetContent.outerHeight());
@@ -279,11 +313,16 @@
                 var $arrow = this.$target.find('.arrow');
                 $arrow.removeAttr('style');
                 if (postionInfo.arrowOffset) {
-                    $arrow.css(postionInfo.arrowOffset);
+                    //hide the arrow if offset is negative 
+                    if (postionInfo.arrowOffset.left === -1 || postionInfo.arrowOffset.top === -1) {
+                        $arrow.hide();
+                    } else {
+                        $arrow.css(postionInfo.arrowOffset);
+                    }
                 }
             }
             this._poped = true;
-            this.$element.trigger('shown.' + pluginType);
+            this.$element.trigger('shown.' + pluginType, [this.$target]);
         },
 
         isTargetLoaded: function() {
@@ -316,6 +355,9 @@
         },
         getUrl: function() {
             return this.$element.attr('data-url') || this.options.url;
+        },
+        getAutoHide: function() {
+            return this.$element.attr('data-auto-hide') || this.options.autoHide;
         },
         getCache: function() {
             var dataAttr = this.$element.attr('data-cache');
@@ -350,16 +392,13 @@
             }
             return this.options.delay.hide === 0 ? 0 : this.options.delay.hide || 100;
         },
-        getConstrains: function() {
-            var dataAttr = this.$element.attr('data-contrains');
-            if (typeof(dataAttr) !== 'undefined') {
-                return dataAttr;
-            }
-            return this.options.constrains;
-        },
         getAnimation: function() {
             var dataAttr = this.$element.attr('data-animation');
             return dataAttr || this.options.animation;
+        },
+        getHideAnimation: function() {
+            var ani = this.getAnimation();
+            return ani ? ani + '-out' : 'out';
         },
         setTitle: function(title) {
             var $titleEl = this.getTitleElement();
@@ -380,7 +419,7 @@
             } else if (!this.content) {
                 var content = '';
                 if ($.isFunction(this.options.content)) {
-                    content = this.options.content.apply(this.$element[0], arguments);
+                    content = this.options.content.apply(this.$element[0], [this]);
                 } else {
                     content = this.options.content;
                 }
@@ -398,6 +437,9 @@
         },
         setContentASync: function(content) {
             var that = this;
+            if (this.xhr) {
+                return;
+            }
             this.xhr = $.ajax({
                 url: this.getUrl(),
                 type: 'GET',
@@ -421,7 +463,9 @@
                     if (that.options.async.success) {
                         that.options.async.success(that, data);
                     }
-                    this.xhr = null;
+                },
+                complete: function() {
+                    that.xhr = null;
                 }
             });
         },
@@ -480,7 +524,7 @@
                     .on('mouseenter', $.proxy(this.mouseenterHandler, this))
                     .on('mouseleave', $.proxy(this.mouseleaveHandler, this));
             }
-            this.$target.find('.close').off('click').on('click', $.proxy(this.hide, this));
+            this.$target.find('.close').off('click').on('click', $.proxy(this.hide, this, true));
             this.$target.off('click.webui-popover').on('click.webui-popover', $.proxy(this.targetClickHandler, this));
         },
         /* utils methods */
@@ -505,38 +549,39 @@
                 placement = this.$element.data('placement') || this.options.placement;
             }
 
+            var isH = placement === 'horizontal';
+            var isV = placement === 'vertical';
+            var detect = placement === 'auto' || isH || isV;
 
-            if (placement === 'auto') {
-                var constrainsH = this.getConstrains() === 'horizontal',
-                    constrainsV = this.getConstrains() === 'vertical';
+            if (detect) {
                 if (pageX < clientWidth / 3) {
                     if (pageY < clientHeight / 3) {
-                        placement = constrainsH ? 'right-bottom' : 'bottom-right';
+                        placement = isH ? 'right-bottom' : 'bottom-right';
                     } else if (pageY < clientHeight * 2 / 3) {
-                        if (constrainsV) {
+                        if (isV) {
                             placement = pageY <= clientHeight / 2 ? 'bottom-right' : 'top-right';
                         } else {
                             placement = 'right';
                         }
                     } else {
-                        placement = constrainsH ? 'right-top' : 'top-right';
+                        placement = isH ? 'right-top' : 'top-right';
                     }
                     //placement= pageY>targetHeight+arrowSize?'top-right':'bottom-right';
                 } else if (pageX < clientWidth * 2 / 3) {
                     if (pageY < clientHeight / 3) {
-                        if (constrainsH) {
+                        if (isH) {
                             placement = pageX <= clientWidth / 2 ? 'right-bottom' : 'left-bottom';
                         } else {
                             placement = 'bottom';
                         }
                     } else if (pageY < clientHeight * 2 / 3) {
-                        if (constrainsH) {
+                        if (isH) {
                             placement = pageX <= clientWidth / 2 ? 'right' : 'left';
                         } else {
                             placement = pageY <= clientHeight / 2 ? 'bottom' : 'top';
                         }
                     } else {
-                        if (constrainsH) {
+                        if (isH) {
                             placement = pageX <= clientWidth / 2 ? 'right-top' : 'left-top';
                         } else {
                             placement = 'top';
@@ -545,21 +590,21 @@
                 } else {
                     //placement = pageY>targetHeight+arrowSize?'top-left':'bottom-left';
                     if (pageY < clientHeight / 3) {
-                        placement = constrainsH ? 'left-bottom' : 'bottom-left';
+                        placement = isH ? 'left-bottom' : 'bottom-left';
                     } else if (pageY < clientHeight * 2 / 3) {
-                        if (constrainsV) {
+                        if (isV) {
                             placement = pageY <= clientHeight / 2 ? 'bottom-left' : 'top-left';
                         } else {
                             placement = 'left';
                         }
                     } else {
-                        placement = constrainsH ? 'left-top' : 'top-left';
+                        placement = isH ? 'left-top' : 'top-left';
                     }
                 }
             } else if (placement === 'auto-top') {
                 if (pageX < clientWidth / 3) {
                     placement = 'top-right';
-                } else if (pageX < clientHeight * 2 / 3) {
+                } else if (pageX < clientWidth * 2 / 3) {
                     placement = 'top';
                 } else {
                     placement = 'top-left';
@@ -567,7 +612,7 @@
             } else if (placement === 'auto-bottom') {
                 if (pageX < clientWidth / 3) {
                     placement = 'bottom-right';
-                } else if (pageX < clientHeight * 2 / 3) {
+                } else if (pageX < clientWidth * 2 / 3) {
                     placement = 'bottom';
                 } else {
                     placement = 'bottom-left';
@@ -600,13 +645,20 @@
 
         getTargetPositin: function(elementPos, placement, targetWidth, targetHeight) {
             var pos = elementPos,
+                de = document.documentElement,
+                db = document.body,
+                clientWidth = de.clientWidth,
+                clientHeight = de.clientHeight,
                 elementW = this.$element.outerWidth(),
                 elementH = this.$element.outerHeight(),
+                scrollTop = Math.max(db.scrollTop, de.scrollTop),
+                scrollLeft = Math.max(db.scrollLeft, de.scrollLeft),
                 position = {},
                 arrowOffset = null,
                 arrowSize = this.options.arrow ? 20 : 0,
                 fixedW = elementW < arrowSize + 10 ? arrowSize : 0,
-                fixedH = elementH < arrowSize + 10 ? arrowSize : 0;
+                fixedH = elementH < arrowSize + 10 ? arrowSize : 0,
+                padding = 10;
             switch (placement) {
                 case 'bottom':
                     position = {
@@ -706,6 +758,41 @@
                     break;
 
             }
+            //fix the position if it is outside of the screen
+            var pageH = clientHeight + scrollTop;
+            var pageW = clientWidth + scrollLeft;
+
+            if (position.left < 0) {
+                position.left = padding;
+                arrowOffset = {
+                    left: -1
+                };
+            }
+            if (position.left + targetWidth > pageW) {
+                position.left = pageW - targetWidth - elementW - padding;
+                //need fixed again
+                if (position.left < 0) {
+                    position.left = padding;
+                }
+                arrowOffset = {
+                    left: -1
+                };
+            }
+
+            if (position.top < 0) {
+                position.top = elementH + padding;
+                arrowOffset = {
+                    top: -1
+                };
+            }
+
+            if (position.top + targetHeight > pageH) {
+                position.top = pageH - targetHeight - elementH - padding;
+                arrowOffset = {
+                    top: -1
+                };
+            }
+
             return {
                 position: position,
                 arrowOffset: arrowOffset
