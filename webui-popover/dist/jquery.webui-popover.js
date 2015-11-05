@@ -52,7 +52,9 @@
         onShow: null,
         onHide: null,
         abortXHR: true,
-        autoHide: false
+        autoHide: false,
+        offsetTop: 0,
+        offsetLeft: 0
     };
 
 
@@ -62,6 +64,10 @@
     var _isBodyEventHandled = false;
     var _offsetOut = -2000; // the value offset  out of the screen
     var $document = $(document);
+
+    var toNumber = function(numeric, fallback) {
+        return isNaN(numeric) ? (fallback || 0) : Number(numeric);
+    };
 
 
 
@@ -284,14 +290,23 @@
             }
             $target.appendTo(document.body);
 
-            targetWidth = $target[0].offsetWidth;
-            targetHeight = $target[0].offsetHeight;
+
             placement = this.getPlacement(elementPos);
 
             //This line is just for compatible with knockout custom binding
             this.$element.trigger('added.' + pluginType);
 
             this.initTargetEvents();
+
+            if (!this.options.padding) {
+                if (this.options.height !== 'auto') {
+                    $targetContent.css('height', $targetContent.outerHeight());
+                }
+                this.$target.addClass('webui-no-padding');
+            }
+            targetWidth = $target[0].offsetWidth;
+            targetHeight = $target[0].offsetHeight;
+
             var postionInfo = this.getTargetPositin(elementPos, placement, targetWidth, targetHeight);
 
             this.$target.css(postionInfo.position).addClass(placement).addClass('in');
@@ -303,12 +318,7 @@
 
 
 
-            if (!this.options.padding) {
-                if (this.options.height !== 'auto') {
-                    $targetContent.css('height', $targetContent.outerHeight());
-                }
-                this.$target.addClass('webui-no-padding');
-            }
+
             if (!this.options.arrow) {
                 this.$target.css({
                     'margin': 0
@@ -363,6 +373,12 @@
         },
         getAutoHide: function() {
             return this.$element.attr('data-auto-hide') || this.options.autoHide;
+        },
+        getOffsetTop: function() {
+            return toNumber(this.$element.attr('data-offset-top')) || this.options.offsetTop;
+        },
+        getOffsetLeft: function() {
+            return toNumber(this.$element.attr('data-offset-left')) || this.options.offsetLeft;
         },
         getCache: function() {
             var dataAttr = this.$element.attr('data-cache');
@@ -786,6 +802,8 @@
                     break;
 
             }
+            position.top += this.getOffsetTop();
+            position.left += this.getOffsetLeft();
 
             return {
                 position: position,
