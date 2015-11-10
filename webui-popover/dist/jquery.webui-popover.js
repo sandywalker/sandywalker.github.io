@@ -1,5 +1,5 @@
 /*
- *  webui popover plugin  - v1.2.0
+ *  webui popover plugin  - v1.2.1
  *  A lightWeight popover plugin with jquery ,enchance the  popover plugin of bootstrap with some awesome new features. It works well with bootstrap ,but bootstrap is not necessary!
  *  https://github.com/sandywalker/webui-popover
  *
@@ -42,7 +42,7 @@
         template: '<div class="webui-popover">' +
             '<div class="arrow"></div>' +
             '<div class="webui-popover-inner">' +
-            '<a href="#" class="close">x</a>' +
+            '<a href="#" class="close">&times;</a>' +
             '<h3 class="webui-popover-title"></h3>' +
             '<div class="webui-popover-content"><i class="icon-refresh"></i> <p>&nbsp;</p></div>' +
             '</div>' +
@@ -363,7 +363,10 @@
             return this.getTarget().find('.' + pluginClass + '-title');
         },
         getContentElement: function() {
-            return this.getTarget().find('.' + pluginClass + '-content');
+            if (!this.$contentElement) {
+                this.$contentElement = this.getTarget().find('.' + pluginClass + '-content');
+            }
+            return this.$contentElement;
         },
         getTitle: function() {
             return this.$element.attr('data-title') || this.options.title || this.$element.attr('title');
@@ -434,8 +437,20 @@
         },
         getContent: function() {
             if (this.getUrl()) {
-                if (this.options.type === 'iframe') {
-                    this.content = $('<iframe frameborder="0"></iframe>').attr('src', this.getUrl());
+                switch (this.options.type) {
+                    case 'iframe':
+                        this.content = $('<iframe frameborder="0"></iframe>').attr('src', this.getUrl());
+                        break;
+                    case 'html':
+                        try {
+                            this.content = $(this.getUrl());
+                            if (!this.content.is(':visible')) {
+                                this.content.show();
+                            }
+                        } catch (error) {
+                            throw new Error('Unable to get popover content. Invalid selector specified.');
+                        }
+                        break;
                 }
             } else if (!this.content) {
                 var content = '';
@@ -447,9 +462,9 @@
                 this.content = this.$element.attr('data-content') || content;
                 if (!this.content) {
                     var $next = this.$element.next();
-                    if ($next && $next.hasClass(pluginClass)) {
-                        this.content = $next.html();
-                        $next.remove();
+
+                    if ($next && $next.hasClass(pluginClass + '-content')) {
+                        this.content = $next;
                     }
                 }
             }
@@ -457,7 +472,14 @@
         },
         setContent: function(content) {
             var $target = this.getTarget();
-            this.getContentElement().html(content);
+            var $ct = this.getContentElement();
+            if (typeof content === 'string') {
+                $ct.html(content);
+            } else if (content instanceof jQuery) {
+                content.removeClass(pluginClass + '-content');
+                $ct.html('');
+                content.appendTo($ct);
+            }
             this.$target = $target;
         },
         isAsync: function() {
