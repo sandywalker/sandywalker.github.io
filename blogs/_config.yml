@@ -10,10 +10,10 @@ title: Sandy Walker's Blog
 email: sanddywalker@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   Welcome to my Blog Site, I'm a java and javascript developer. Let's write the code and change the world!
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/blogs" # the subpath of your site, e.g. /blog
 url: "http://sandywalker.github.io" # the base hostname & protocol for your site
 twitter_username: sandywalker
-github_username:  sandyDuan
+github_username:  sandywalker
 
 # Build settings
 markdown: kramdown
