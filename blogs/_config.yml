@@ -1,0 +1,19 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: Sandy Walker's Blog
+email: sanddywalker@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  Welcome to my Blog Site, I'm a java and javascript developer. Let's write the code and change the world!
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://sandywalker.github.io" # the base hostname & protocol for your site
+twitter_username: sandywalker
+github_username:  sandyDuan
+
+# Build settings
+markdown: kramdown
